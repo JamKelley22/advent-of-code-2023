@@ -6,7 +6,7 @@ npm install typescript --save-dev
 
 npm install @types/node --save-dev
 
-npx tsc --init --rootDir src --outDir build \
+npx tsc --init --rootDir . --outDir build \
 --esModuleInterop --resolveJsonModule --lib es6 \
 --module commonjs --allowJs true --noImplicitAny true
 
@@ -14,8 +14,8 @@ mkdir src
 touch src/index.ts
 
 sed -i '' -E 's/("test": "echo \\"Error: no test specified\\" && exit 1")/"build": "npx tsc",\
-\t\t"start1": "node build\/part1.js",\
-\t\t"start2": "node build\/part2.js",\
+\t\t"start1": "npm run build && node build\/part1.js",\
+\t\t"start2": "npm run build && node build\/part2.js",\
 \t\t"test": "jest"/' package.json
 
 cp ../setup/ts.gitignore .gitignore
