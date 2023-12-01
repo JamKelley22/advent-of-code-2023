@@ -1,9 +1,8 @@
 var fs = require("fs");
 
-const useExample = false;
-const filePath = useExample ? "input-example.txt" : "input.txt";
-
 try {
+  const useExample = false;
+  const filePath = useExample ? "input-example1.txt" : "input.txt";
   const input = fs.readFileSync(filePath, "utf8");
 
   //   const calibrationValues: string[] = [];
