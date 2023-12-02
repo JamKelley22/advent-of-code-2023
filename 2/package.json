@@ -1,0 +1,22 @@
+{
+  "name": "2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx tsc",
+    "dev1": "tsnd --respawn src/part1.ts",
+    "dev2": "tsnd --respawn src/part2.ts",
+    "start1": "npm run build && node build/src/part1.js",
+    "start2": "npm run build && node build/src/part2.js",
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.10.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.2"
+  }
+}

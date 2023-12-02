@@ -24,10 +24,6 @@ Consider your entire calibration document. What is the sum of all of the calibra
 
 ## Solution 1
 
-### Why TS?
-
-I decided to use typescript as my language to solve the Advent of Code problems this year partly due to my familiarity with it and partly due to the fact that is really the only language I regularly use and have no pressing need to learn or brush up on other languages yet.
-
 ### Techniques?
 
 Last year I tried to follow Test Driven Development. This year I may loosely follow it as well. For the first day I did not write tests (expecting the problem to be extremely easy with nearly no tricks). After completing it I see that that was a mistake to assume so.
