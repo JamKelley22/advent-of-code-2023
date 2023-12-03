@@ -14,6 +14,8 @@ mkdir src
 touch src/index.ts
 
 sed -i '' -E 's/("test": "echo \\"Error: no test specified\\" && exit 1")/"build": "npx tsc",\
+\t\t"dev1": "tsnd --respawn src\/part1.ts",\
+\t\t"dev2": "tsnd --respawn src\/part2.ts",\
 \t\t"start1": "npm run build && node build\/part1.js",\
 \t\t"start2": "npm run build && node build\/part2.js",\
 \t\t"test": "jest"/' package.json
