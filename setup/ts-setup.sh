@@ -6,6 +6,8 @@ npm install typescript --save-dev
 
 npm install @types/node --save-dev
 
+npm install ts-node-dev --save-dev
+
 npx tsc --init --rootDir . --outDir build \
 --esModuleInterop --resolveJsonModule --lib es6 \
 --module commonjs --allowJs true --noImplicitAny true
