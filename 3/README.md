@@ -14,3 +14,11 @@
 - Agonizingly straightforward compared to the troubles I was having with the previous part
 - Still looking around the numbers in all directions
 - New Map for all potential gears and add each number with an adjacent potential gear around it to that map gear location
+
+# Things I learned
+
+- Burn it to the ground and rebuild it if you keep chasing gremlins /s
+- Try visualizing the problem (maybe use HTML)
+- When rendering lines[] in html .join them with a <br/> and surround the whole thing in a <code> block
+- Remember to actually split everything into a function, don't get complacent
+- Test each of those functions, don't get complacent
