@@ -4,7 +4,7 @@ import {
   parseNumberIndexPairsInLine,
   searchAll,
 } from "./part1";
-import { isNumber, isSymbolExcludePeriod } from "./partOne";
+import { isNumber, isSymbolExcludePeriod } from "./engine";
 
 describe("part1", () => {
   //   test("finds valid numbers 1", () => {

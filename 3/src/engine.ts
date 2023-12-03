@@ -1,92 +1,66 @@
-import { findValidNumbers } from "./part1";
+export const isNumber = (char: string): boolean => {
+  if (char.length > 1) throw new Error("isNumber only accepts one character");
+  const charCode = char.charCodeAt(0),
+    zeroCharCode = "0".charCodeAt(0),
+    nineCharCode = "9".charCodeAt(0);
+  if (charCode > nineCharCode || charCode < zeroCharCode) return false;
+  return true;
+};
 
-var http = require("http");
-var fs = require("fs");
+export const isSymbolExcludePeriod = (char: string): boolean => {
+  const symbolExcludePeriodRegex = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/?~]/g;
 
-const host = "localhost";
-const port = 8000;
+  if (char.length > 1)
+    throw new Error("isSymbolExcludePeriod only accepts one character");
 
-const server = http.createServer(function (
-  req: any,
-  res: {
-    writeHead: (
-      arg0: number,
-      arg1: {
-        "Content-Type": string;
-        "Content-Length": number;
-        Expires: string;
+  return char.search(symbolExcludePeriodRegex) === -1 ? false : true;
+};
+
+export const parseNumberAndSymbolLocations = (
+  input: string,
+  lineLength: number
+) => {
+  const numberLocationMap = new Map<string, number>();
+  const symbolLocationMap = new Map<string, string>();
+  let lineIndex = 0;
+  let currentNumberStart = { i: -1, j: -1 };
+  let currentNumber = "";
+  for (let index = 0; index < input.length; index++) {
+    const char = input[index];
+    if (!isNumber(char)) {
+      //Finish whatever number
+      if (currentNumber) {
+        numberLocationMap.set(
+          `${currentNumberStart.i},${currentNumberStart.j}`,
+          parseInt(currentNumber)
+        );
       }
-    ) => void;
-    end: (arg0: string) => void;
+      //Reset currentNumber
+      currentNumber = "";
+      currentNumberStart = { i: -1, j: -1 };
+      if (char === "\n") {
+        //Assuming a fully filled (non-jagged) matrix of symbols/numbers
+        // if (lineLength === -1) lineLength = index;
+        lineIndex++;
+        continue;
+      }
+      if (char === ".") {
+        continue;
+      }
+
+      if (isSymbolExcludePeriod(char)) {
+        symbolLocationMap.set(`${lineIndex},${index % lineLength}`, char);
+        continue;
+      }
+    }
+    // Is a number
+    if (!currentNumber) {
+      //First number, set location
+      currentNumberStart = { i: lineIndex, j: index % lineLength };
+    }
+
+    currentNumber += char;
   }
-) {
-  var html = buildHtml(req);
 
-  res.writeHead(200, {
-    "Content-Type": "text/html",
-    "Content-Length": html.length,
-    Expires: new Date().toUTCString(),
-  });
-  res.end(html);
-});
-server.listen(port, host, () => {
-  console.log(`Server is running on http://${host}:${port}`);
-});
-
-function buildHtml(req: any) {
-  const useExample = true;
-  const filePath = useExample ? "input-example1.1.txt" : "input.txt";
-  const input = fs.readFileSync(filePath, "utf8");
-
-  const lines: string[] = input.split("\n");
-
-  const { symbolSet, parsedLines } = findValidNumbers(lines);
-  const numCoordSet = new Set<string>();
-  parsedLines.forEach((pl, i) => {
-    pl.numbersInLine.forEach((numInLine) => {
-      for (
-        let numIndex = 0;
-        numIndex < numInLine.number.toString().length;
-        numIndex++
-      ) {
-        if (numInLine.number === 4)
-          console.log(numInLine, i, `${i},${numInLine.index + numIndex}`);
-        numCoordSet.add(`${i},${numInLine.index + numIndex}`);
-      }
-    });
-  });
-
-  var header = "";
-  //console.log(lines);
-  // console.log(numCoordSet.has(`${8},${32}`));
-
-  var body = lines
-    .map((line, i) => {
-      return `<code>${line
-        .split("")
-        .map(
-          (char, j) =>
-            `<span class="${i},${j}" ${
-              symbolSet.has(`${i},${j}`)
-                ? 'style="color:red;font-weight:bold"'
-                : ""
-            } ${char === "." ? 'style="color:gray;font-weight:lighter"' : ""}
-            ${
-              numCoordSet.has(`${i},${j}`)
-                ? 'style="color:green;font-weight:bold"'
-                : ""
-            }>${char}</span>`
-        )
-        .join(" ")}</code>`;
-    })
-    .join("<br/>");
-
-  return (
-    "<!DOCTYPE html>" +
-    "<html><head>" +
-    header +
-    "</head><body>" +
-    body +
-    "</body></html>"
-  );
-}
+  return { symbolLocationMap, numberLocationMap };
+};
