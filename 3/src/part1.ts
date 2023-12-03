@@ -6,7 +6,7 @@ var fs = require("fs");
 //   },
 // });
 
-function searchAll(str: string, searcher: RegExp): number[] {
+export function searchAll(str: string, searcher: RegExp): number[] {
   const split = str.split(searcher);
   return split
     .reduce((acc, term, i) => {
@@ -16,10 +16,27 @@ function searchAll(str: string, searcher: RegExp): number[] {
     .map((num) => num - 1);
 }
 
-export const findValidNumbers = (lines: string[]) => {
-  const regex = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/?~]/g;
+export const parseNumberIndexPairsInLine = (
+  line: string,
+  regex: RegExp
+): {
+  number: number;
+  index: number;
+}[] => {
+  return line
+    .replaceAll(regex, ".")
+    .split(".")
+    .map((str) => parseInt(str))
+    .filter((num) => num)
+    .map((num) => ({
+      number: num,
+      index: line.indexOf(num.toString()),
+    }));
+};
 
+export const findValidNumbers = (lines: string[]) => {
   //   console.log("..35..633.".indexOf("633"));
+  const regex = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/?~]/g;
 
   //   const numAddSet = new Set<string>(); //Here this is a string to show row,col:number so that duplicate numbers in different places of the input can be added
   const numAddArray = [] as number[];
@@ -28,16 +45,12 @@ export const findValidNumbers = (lines: string[]) => {
   const symbolSet = new Set<string>();
 
   const parsedLines = lines.map((line, i) => {
+    const numbersInLine = parseNumberIndexPairsInLine(
+      (" " + line).slice(1),
+      regex
+    );
+
     const symbolIndexesInLine = searchAll(line, regex);
-    const numbersInLine = line
-      .replaceAll(regex, ".")
-      .split(".")
-      .map((str) => parseInt(str))
-      .filter((num) => num)
-      .map((num) => ({
-        number: num,
-        index: line.indexOf(num.toString()),
-      }));
     // console.log(numbersInLine);
 
     // Construct hashmap based upon the locations of the numbers
@@ -71,7 +84,14 @@ export const findValidNumbers = (lines: string[]) => {
       const rowIndex = index,
         colIndex = parsedLine.numbersInLine[j].index,
         numberLength = parsedLine.numbersInLine[j].number.toString().length;
-      //   console.log(`${rowIndex},${colIndex}`);
+      //   if (parsedLine.numbersInLine[j].number === 4) {
+      //     //   console.log(index, j, parsedLine.numbersInLine[j]);
+      //     console.log(
+      //       `${rowIndex},${colIndex}`,
+      //       symbolSet.has(`${rowIndex},${colIndex + numberLength}`),
+      //       symbolSet
+      //     );
+      //   }
 
       // Check in 8 directions for symbol, if hit a symbol in the symbolSet at that location, add the current number to the array and break with next number
       // Since we're just doing a check of a set as a string xy we don't need to check if each direction goes negative or past the max, it simply wont be there in that case
@@ -171,6 +191,8 @@ try {
   //   //Assuming a fully filled (non-jagged) matrix of symbols/numbers
   //   const lineLength = lines[0].length;
   const { numAddArray } = findValidNumbers(lines);
+  console.log(numAddArray);
+
   const numberSum = numAddArray.reduce((acc, num) => acc + num, 0);
   console.log(numberSum);
   //318539 is too low

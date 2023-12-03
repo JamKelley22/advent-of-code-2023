@@ -34,8 +34,8 @@ server.listen(port, host, () => {
 });
 
 function buildHtml(req: any) {
-  const useExample = false;
-  const filePath = useExample ? "input-example1.txt" : "input.txt";
+  const useExample = true;
+  const filePath = useExample ? "input-example1.1.txt" : "input.txt";
   const input = fs.readFileSync(filePath, "utf8");
 
   const lines: string[] = input.split("\n");
@@ -49,6 +49,8 @@ function buildHtml(req: any) {
         numIndex < numInLine.number.toString().length;
         numIndex++
       ) {
+        if (numInLine.number === 4)
+          console.log(numInLine, i, `${i},${numInLine.index + numIndex}`);
         numCoordSet.add(`${i},${numInLine.index + numIndex}`);
       }
     });
@@ -56,6 +58,7 @@ function buildHtml(req: any) {
 
   var header = "";
   //console.log(lines);
+  // console.log(numCoordSet.has(`${8},${32}`));
 
   var body = lines
     .map((line, i) => {
@@ -63,7 +66,7 @@ function buildHtml(req: any) {
         .split("")
         .map(
           (char, j) =>
-            `<span ${
+            `<span class="${i},${j}" ${
               symbolSet.has(`${i},${j}`)
                 ? 'style="color:red;font-weight:bold"'
                 : ""
