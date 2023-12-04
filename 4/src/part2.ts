@@ -49,16 +49,15 @@ export const calculatePointsAndMatchesFromCard = (
   );
 };
 
-export const doWork = (cards: Card[], card: Card): number => {
-  //   console.log(card.cardNum);
+export const calculateNumberOfCopies = (
+  cards: Card[],
+  card: Card,
+  storedCopyNumMap?: Map<number, number>
+): number => {
+  const storedValue = storedCopyNumMap?.get(card.cardNum);
+  if (storedValue) return storedValue;
 
-  // Stop Condition
   const result = calculatePointsAndMatchesFromCard(card);
-  //   console.log(card.cardNum, result);
-
-  //   if (result.matches === 0) {
-  //     return 1;
-  //   }
 
   const cardsToDoWorkOn = cards.slice(
     card?.cardNum,
@@ -69,9 +68,11 @@ export const doWork = (cards: Card[], card: Card): number => {
 
   const cardValue =
     cardsToDoWorkOn.reduce(
-      (acc, cardToDoWorkOn) => acc + doWork(cards, cardToDoWorkOn),
+      (acc, cardToDoWorkOn) =>
+        acc + calculateNumberOfCopies(cards, cardToDoWorkOn, storedCopyNumMap),
       0
     ) + 1;
+  storedCopyNumMap?.set(card.cardNum, cardValue);
 
   //   console.log(
   //     `CardNum: ${
@@ -94,60 +95,22 @@ try {
     return parseCard(line);
   });
 
-  //   let total = 0;
-  //   for (let index = 0; index < cards.length; index++) {
-  //     const card = cards[index];
-  //     total += doWork(cards, card);
-  //   }
+  const storedCopyNumMap = new Map<number, number>();
 
-  //   total += cards.length;
-  //   console.log(total);
+  var startTime = performance.now();
 
   const total = cards.reduce(
-    (acc, card) => acc + doWork(cards, cards[card.cardNum - 1]),
+    (acc, card) =>
+      acc +
+      calculateNumberOfCopies(cards, cards[card.cardNum - 1], storedCopyNumMap),
     0
   );
+
+  var endTime = performance.now();
+
+  console.log(`Took ${endTime - startTime} milliseconds`);
+
   console.log(total);
-
-  //   console.log(doWork(cards, cards[1 - 1]));
-
-  //   const cardsToProcess = cards;
-  //   let totalCardsProcessed = cards.length;
-
-  //   for (let index = 0; cardsToProcess.length > 0; index++) {
-  //     // console.log(index);
-
-  //     const card = cardsToProcess.shift();
-  //     // console.log(card);
-
-  //     if (!card) continue;
-  //     const result = calculatePointsAndMatchesFromCard(card);
-  //     const earnedCopiedCards = cards.slice(
-  //       card?.cardNum - 1,
-  //       Math.min(result.matches + card?.cardNum - 1, cards.length)
-  //     );
-
-  //     console.log(
-  //       card.cardNum,
-  //       earnedCopiedCards.map((card) => card.cardNum)
-  //     );
-  //     // cardsToProcess.push(...earnedCopiedCards);
-  //     totalCardsProcessed += earnedCopiedCards.length;
-  //   }
-
-  //   cardsToProcess.forEach((card, i, arr) => {});
-
-  //   //   const cardsResults = copiedCardsWon.reduce(
-  //   //     (acc, card) => {
-  //   //       const pointsAndMatches = calculatePointsAndMatchesFromCard(card);
-  //   //       return [...acc, pointsAndMatches];
-  //   //     },
-  //   //     [] as {
-  //   //       points: number;
-  //   //       matches: number;
-  //   //     }[]
-  //   //   );
-  //   console.log(totalCardsProcessed);
 } catch (e: any) {
   console.log("Error:", e.stack);
 }
