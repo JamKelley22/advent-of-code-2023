@@ -12,7 +12,7 @@ try {
     .trim()
     .split(" ")
     .map((seedStr) => parseInt(seedStr));
-  console.log(seedsNums);
+  //   console.log(seedsNums);
 
   const maps: Map<number, number>[] = [];
   const mapStrings: string[][] = [];
@@ -36,14 +36,35 @@ try {
       .split(" ")
       .map((strNum) => parseInt(strNum));
     for (let j = 0; j < range; j++) {
-      maps[mapStringsIndex].set(source + j, dest + j);
+      maps[mapStringsIndex].set(dest + j, source + j);
     }
   }
   //Flush the last value
   mapStrings[mapStringsIndex] = currentMapStrings;
 
   //   console.log(mapStrings);
-  //   console.log(maps);
+  //   console.log(maps[0]);
+
+  let lowestLocationNum = Number.MAX_SAFE_INTEGER;
+
+  //   console.log("=====================");
+  for (let seedNumIndex = 0; seedNumIndex < seedsNums.length; seedNumIndex++) {
+    // console.log("seed num:", seedsNums[seedNumIndex]);
+
+    const seedNum = seedsNums[seedNumIndex];
+    let nextMapInput = seedNum;
+    for (let mapIndex = 0; mapIndex < maps.length; mapIndex++) {
+      const map = maps[mapIndex];
+      nextMapInput = map.get(nextMapInput) ?? nextMapInput;
+      //   console.log("next:", nextMapInput);
+    }
+    const locationNum = nextMapInput;
+    if (locationNum < lowestLocationNum) lowestLocationNum = locationNum;
+    // console.log("location:", locationNum);
+    // console.log("=====================");
+  }
+
+  console.log(lowestLocationNum);
 
   //   const result = lines.reduce((acc, line) => {
   //     //
