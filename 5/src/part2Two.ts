@@ -9,6 +9,30 @@ export const parseSeeds = (seedLine: string): number[] => {
     .split(" ")
     .map((seed) => parseInt(seed));
 };
+export const parseSeedRanges = (line: string) => {
+  const [seedLabel, seedsString] = line.split(":");
+  const seedDetailsArr = seedsString
+    .trim()
+    .split(" ")
+    .map((seedStr) => parseInt(seedStr));
+
+  const seedNumRanges = seedDetailsArr.reduce((acc, cv, i, arr) => {
+    if (i % 2 === 0) {
+      const range = arr[i + 1];
+
+      if (!range) return acc;
+      const bigCV = BigInt(cv);
+
+      const min = bigCV,
+        max = bigCV + BigInt(range);
+
+      return [...acc, { min, max: max - BigInt(1) }];
+    }
+    return acc;
+  }, [] as { min: bigint; max: bigint }[]);
+
+  return seedNumRanges;
+};
 
 export const getOverlappingRanges = (
   mapRow: {
