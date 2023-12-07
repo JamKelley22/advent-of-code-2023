@@ -1,6 +1,8 @@
 var fs = require("fs");
 const util = require("util");
 
+const log = false;
+
 const cardToValue = new Map<string, number>([
   ["A", 14],
   ["K", 13],
@@ -19,6 +21,7 @@ const cardToValue = new Map<string, number>([
 
 type Hand = {
   cards: number[];
+  transformedCards?: number[];
   strength: number;
 };
 
@@ -80,8 +83,46 @@ export const getHandStrength = (
   return { strength: -1, cardMap };
 };
 
-export const parseHand = (handStr: string): Hand => {
+// export const bruteForceJokerHand = (cards: number[]): Hand => {
+//   const jokerValue = cardToValue.get("J") ?? -1;
+
+//   if (!cards.includes(jokerValue))
+//     return {
+//       cards,
+//       transformedCards: cards,
+//       strength: getHandStrength(cards).strength,
+//     };
+
+//   const { bestJokerValue, bestHandStrength } = cards.reduce(
+//     (acc, cardValue) => {
+//       const handStrength = getHandStrength(
+//         cards.map((cardV) => (cardV === jokerValue ? cardValue : cardV))
+//       );
+//       if (handStrength.strength > acc.bestHandStrength) {
+//         return {
+//           bestJokerValue: cardValue,
+//           bestHandStrength: handStrength.strength,
+//         };
+//       }
+//       return acc;
+//     },
+//     { bestJokerValue: -1, bestHandStrength: 0 }
+//   );
+//   return {
+//     cards,
+//     transformedCards: cards.map((cardValue) =>
+//       cardValue === jokerValue ? bestJokerValue : cardValue
+//     ),
+//     strength: bestHandStrength,
+//   };
+// };
+
+export const parseHand = (
+  handStr: string,
+  jokerRule: boolean = false
+): Hand => {
   const jokerValue = cardToValue.get("J") ?? -1;
+  const highestValue = cardToValue.get("A") ?? -1;
 
   const cards = handStr.split("").map((cardStr) => {
     const cardValue = cardToValue.get(cardStr) ?? -1;
@@ -90,52 +131,114 @@ export const parseHand = (handStr: string): Hand => {
   });
 
   const { strength: handStrengthOG, cardMap } = getHandStrength(cards);
-  let jokerTransformCardValue: number;
+
+  if (!jokerRule || !cards.includes(jokerValue))
+    return { cards, strength: handStrengthOG };
+
+  if (log) console.log("str", handStrengthOG, cards);
+
+  let jokerTransformCardValue: number = -1;
 
   // Transform Jokers into the best hand
-  switch (handStrengthOG) {
-    case Strength.FiveOfAKind:
-    case Strength.FourOfAKind:
-    case Strength.ThreeOfAKind: // Can become 4 of a kind so do that
-    case Strength.HighCard: // Base case so always make a pair
-      jokerTransformCardValue = cards.sort()[0]; // Grab the highest card
-    case Strength.FullHouse:
-      jokerTransformCardValue =
-        [...cardMap].find(([cardValue, cardNum]) => cardNum === 3)?.[0] ?? -1; // Grab the card value of the 3 of a kind
-    case Strength.TwoPair:
-      jokerTransformCardValue = [...cardMap].reduce(
-        (acc, [cardValue, cardNum]) => {
-          // Find the card with a match of the greatest value
-          if (cardNum !== 2) return acc;
-          if (cardValue > acc) return cardValue;
-          return acc;
-        },
-        -1
-      );
-    case Strength.OnePair:
-      jokerTransformCardValue =
-        [...cardMap].find(([cardValue, cardNum]) => cardNum === 2)?.[0] ?? -1; // Grab the card value of the pair
+  if (handStrengthOG === Strength.FiveOfAKind) {
+    jokerTransformCardValue = highestValue; // Grab the card value of the 5 of a kind
+  } else if (handStrengthOG === Strength.FourOfAKind) {
+    const a = [...cardMap].find(([cardValue, cardNum]) => cardNum === 4);
+    const b = [...cardMap].find(([cardValue, cardNum]) => cardNum === 1);
+    if (a?.[0] === jokerValue) {
+      jokerTransformCardValue = b?.[0] ?? highestValue;
+    } else {
+      jokerTransformCardValue = a?.[0] ?? -1; // Grab the card value of the 3 of a kind
+    }
+  } else if (handStrengthOG === Strength.FullHouse) {
+    const a = [...cardMap].find(([cardValue, cardNum]) => cardNum === 3);
+    const b = [...cardMap].find(([cardValue, cardNum]) => cardNum === 2);
+    if (a?.[0] === jokerValue) {
+      jokerTransformCardValue = b?.[0] ?? highestValue;
+    } else {
+      jokerTransformCardValue = a?.[0] ?? -1; // Grab the card value of the 3 of a kind
+    }
+  } else if (handStrengthOG === Strength.ThreeOfAKind) {
+    const a = [...cardMap].find(([cardValue, cardNum]) => cardNum === 3);
+    if (handStr === "JKJT7") {
+      // console.log(cards, transformedCards, transformedHandStrength);
+      console.log("yes");
+      console.log(a);
+    }
+    if (a?.[0] === jokerValue) {
+      jokerTransformCardValue = cards.reduce((acc, cv) => {
+        if (cv > acc) return cv;
+        return acc;
+      }, 0);
+    } else {
+      jokerTransformCardValue = a?.[0] ?? -1; // Grab the card value of the 3 of a kind
+    }
+    if (handStr === "2JJ5J") {
+      console.log("jokerTransformCardValue", jokerTransformCardValue);
+    }
+  } else if (handStrengthOG === Strength.TwoPair) {
+    jokerTransformCardValue = [...cardMap].reduce(
+      (acc, [cardValue, cardNum]) => {
+        // Find the card with a match of the greatest value
+        if (cardNum !== 2) return acc;
+        if (cardValue > acc) return cardValue;
+        return acc;
+      },
+      -1
+    );
+  } else if (handStrengthOG === Strength.OnePair) {
+    const a = [...cardMap].find(([cardValue, cardNum]) => cardNum === 2);
+    if (handStr === "JKJT7") {
+      // console.log(cards, transformedCards, transformedHandStrength);
+      console.log("yes");
+      console.log(a);
+    }
+    if (a?.[0] === jokerValue) {
+      jokerTransformCardValue = cards.reduce((acc, cv) => {
+        if (cv > acc) return cv;
+        return acc;
+      }, 0);
+    } else {
+      jokerTransformCardValue = a?.[0] ?? -1; // Grab the card value of the 3 of a kind
+    }
+    if (handStr === "2JJ5J") {
+      console.log("jokerTransformCardValue", jokerTransformCardValue);
+    }
+    // Test three of a kind and Full house
+    // jokerTransformCardValue = a?.[0] ?? -1; // Grab the card value of the pair
+  } else if (handStrengthOG === Strength.HighCard) {
+    jokerTransformCardValue = [...cards].sort((a, b) => b - a)[0]; // Grab the highest card
   }
+
+  if (log) console.log("jokerTransformCardValue", jokerTransformCardValue);
+
   const transformedCards = cards.map((cardValue) => {
     if (cardValue === jokerValue) return jokerTransformCardValue;
     return cardValue;
   });
   const { strength: transformedHandStrength } =
     getHandStrength(transformedCards);
+  if (handStr === "2JJ5J") {
+    console.log(cards, transformedCards, transformedHandStrength);
+  }
   return {
     cards,
+    transformedCards,
     strength: transformedHandStrength,
   };
 };
 
-export const parseHandAndBid = (line: string): { hand: Hand; bid: number } => {
+export const parseHandAndBid = (
+  line: string
+): { hand: Hand; handStr: string; bid: number } => {
   const [handStr, bidStr] = line.split(" ");
   const bid = parseInt(bidStr);
 
-  const hand = parseHand(handStr);
+  const hand = parseHand(handStr, true);
 
   return {
     hand,
+    handStr,
     bid,
   };
 };
@@ -167,13 +270,26 @@ try {
     return acc + handAndBid.bid * (i + 1);
   }, 0);
 
-  console.log(
-    util.inspect(sortedHandsAndBids, false, null, true /* enable colors */)
-  );
+  if (log)
+    console.log(
+      util.inspect(
+        sortedHandsAndBids.map((a) => ({
+          strength: a.hand.strength,
+          handStr: a.handStr,
+          cards: a.hand.cards,
+          transformedCards: a.hand.transformedCards,
+        })),
+        false,
+        null,
+        true /* enable colors */
+      )
+    );
 
-  console.log(res);
+  console.log(res, res < 250133784 && res > 249954781);
 
   // 249902881 is too low
+  // 250133784 is too high
+  // 249954781 is too low
 } catch (e: any) {
   console.log("Error:", e.stack);
 }
