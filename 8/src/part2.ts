@@ -25,7 +25,7 @@ export const parseDessertMap = (
 };
 
 try {
-  const useExample = true;
+  const useExample = false;
   const filePath = useExample ? "input-example3.txt" : "input.txt";
   const input = fs.readFileSync(filePath, "utf8");
 
@@ -38,15 +38,20 @@ try {
 
   console.log(dessertMap.startingNodes);
 
+  //   const cycleSet = new Set<string>();
+
   let numSteps = 0;
   let currentLocs = dessertMap.startingNodes;
   for (
     let instructionIndex = 0;
-    currentLocs.every((loc) => loc[loc.length - 1] === "Z") && numSteps < 10;
+    !currentLocs.every((loc) => loc[loc.length - 1] === "Z");
     instructionIndex = (instructionIndex + 1) % instructions.length
   ) {
     numSteps++;
+    // cycleSet.add(currentLocs.reduce((acc, loc) => acc + loc, ""));
     const isRight = instructions[instructionIndex];
+
+    let newLocs = [] as string[];
 
     for (
       let currentLocIndex = 0;
@@ -54,22 +59,34 @@ try {
       currentLocIndex++
     ) {
       const currentLoc = currentLocs[currentLocIndex];
-      
+
       const { left, right } = dessertMap.dessertMap.get(currentLoc) ?? {};
-      console.log(
-        numSteps,
-        "CurrentLoc: ",
-        currentLoc,
-        "Next Options: [",
-        left,
-        right,
-        "]"
-      );
-      if (isRight) currentLoc = right ?? "";
+
+      if (isRight) newLocs.push(right ?? "");
       else {
-        currentLoc = left ?? "";
+        newLocs.push(left ?? "");
       }
     }
+
+    // if (cycleSet.has(newLocs.reduce((acc, loc) => acc + loc, ""))) {
+    //   console.log("Has Cycle");
+    //   break;
+    // }
+
+    if (numSteps % 1000000 === 0) {
+      console.log("Num Steps: ", numSteps);
+    }
+
+    // console.log(
+    //   "Current Locs: ",
+    //   currentLocs,
+    //   "\tDir: ",
+    //   isRight ? "R" : "L",
+    //   "\tNew Locs: ",
+    //   newLocs
+    // );
+    currentLocs = newLocs;
+    newLocs = [];
   }
 
   console.log(numSteps);
