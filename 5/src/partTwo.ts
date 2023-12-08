@@ -38,50 +38,56 @@ export const getOverlappingRanges = (
     max: bigint;
   }[]
 ) => {
+  console.log("\t\t-OverlappingCheck row:", mapRow);
+
   const { s, d, r } = mapRow;
   // Check overlap with each seed range
   return seedRange.reduce(
-    (acc, seedRange) => {
+    (acc, seedRangeSingle) => {
       const overlap = rangeOverlap(
-        seedRange.min,
-        seedRange.max,
+        seedRangeSingle.min,
+        seedRangeSingle.max,
         BigInt(d),
         BigInt(d) + BigInt(r)
       );
+      console.log("\t\t\t_____________");
+
+      console.log("\t\t\t--InnerOverlappingCheck Seed:", seedRangeSingle);
       //   let modifiedSeedRanges = [seedRange];
 
       const croppedSeedRanges = removeRangeFromX(
-        seedRange.min,
-        seedRange.max,
+        seedRangeSingle.min,
+        seedRangeSingle.max,
         BigInt(d),
         BigInt(d) + BigInt(r)
       );
-      console.log(
-        "88",
-        // seedRange.min,
-        // seedRange.max,
-        // BigInt(d),
-        // BigInt(d) + BigInt(r),
-        croppedSeedRanges
-      );
+
+      console.log(`\t\t\t--CroppedSeedRanges: `, croppedSeedRanges);
 
       if (overlap) {
         const differenceBetweenSourceAndDestination = d - s;
 
+        const transformedSeedRange = {
+          min: overlap.min - BigInt(differenceBetweenSourceAndDestination),
+          max: overlap.max - BigInt(differenceBetweenSourceAndDestination),
+        };
+
+        console.log(
+          `\t\t\t--OverlappingTrue, NewSeedRange: `,
+          transformedSeedRange
+        );
+        console.log("\t\t\t_____________");
         return [
           ...acc,
           {
-            transformedSeedRange: {
-              min: overlap.min - BigInt(differenceBetweenSourceAndDestination),
-              max: overlap.max - BigInt(differenceBetweenSourceAndDestination),
-            },
-            croppedSeedRanges: croppedSeedRanges,
-            // modifiedSeedRanges:
-            //   croppedSeedRange !== null ? croppedSeedRange : [],
+            transformedSeedRange,
+            croppedSeedRanges,
           },
         ];
       }
 
+      console.log(`\t\t\t--OverlappingFalse`);
+      console.log("\t\t\t_____________");
       return [
         ...acc,
         {
@@ -133,6 +139,8 @@ try {
   let endTime = performance.now();
   console.log(`Split lines: ${endTime - startTime} ms`);
 
+  console.log("=====================");
+
   const seedLine = lines.shift();
   //   console.log(seedLine);
 
@@ -145,45 +153,58 @@ try {
   const mapsInfo = parseMapsInfo(lines);
 
   mapsInfo.slice(0, 2).forEach((mapInfo, mapInfoIndex) => {
-    // console.log(mapInfo);
+    console.log("++++++++++++++");
+
+    console.log(`+| MapBlock: ${mapInfoIndex}`);
     seedRanges[mapInfoIndex + 1] = [];
     // let modifiedSeedRanges = seedRanges[mapInfoIndex];
 
+    let totalCroppedSeedRanges: {
+      min: bigint;
+      max: bigint;
+    }[] = [];
+
     mapInfo.forEach((mapRow, mapRowIndex) => {
-      //   console.log(mapRow);
+      console.log("\t***********");
+      console.log(`\t+| MapRow: ${mapRowIndex}`);
+      console.log("\t***********");
       const overlappingRanges = getOverlappingRanges(
         mapRow,
         seedRanges[mapInfoIndex]
       );
 
-      console.log(
-        mapInfoIndex,
-        mapRowIndex,
-        overlappingRanges.flatMap((range) => range.croppedSeedRanges)
+      const croppedSeedRanges = overlappingRanges.flatMap(
+        (range) => range.croppedSeedRanges
+      );
+      croppedSeedRanges.forEach((seedRange) => {
+        totalCroppedSeedRanges.push(seedRange);
+        // const newOverlap = rangeOverlap(seedRange.min,seedRange.max,
+      });
+
+      const transformedSeedRanges = overlappingRanges.reduce(
+        (acc, range) => {
+          if (range.transformedSeedRange)
+            return [...acc, range.transformedSeedRange];
+          return acc;
+        },
+        [] as {
+          min: bigint;
+          max: bigint;
+        }[]
       );
 
-      seedRanges[mapInfoIndex + 1].push(
-        ...overlappingRanges.reduce(
-          (acc, range) => {
-            if (range.transformedSeedRange)
-              return [...acc, range.transformedSeedRange];
-            return acc;
-          },
-          [] as {
-            min: bigint;
-            max: bigint;
-          }[]
-        )
-      );
+      console.log("\t\tTransformed Seed Ranges:", transformedSeedRanges);
+
+      seedRanges[mapInfoIndex + 1].push(...transformedSeedRanges);
       // Copy the non-overlapping ranges TODO
-      seedRanges[mapInfoIndex + 1].push(
-        ...overlappingRanges.flatMap((range) => range.croppedSeedRanges)
-      );
       //   seedRanges[mapInfoIndex + 1].push(
       //     ...overlappingRanges.flatMap((range) => range.modifiedSeedRanges)
       //   );
       //   seedRanges[mapInfoIndex + 1].push(...modifiedSeedRanges);
     });
+
+    console.log("\t\tCropped Seed Ranges:", totalCroppedSeedRanges);
+    seedRanges[mapInfoIndex + 1].push(...totalCroppedSeedRanges);
     console.log("================");
   });
   console.log(seedRanges);

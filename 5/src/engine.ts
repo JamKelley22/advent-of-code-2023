@@ -70,31 +70,43 @@ export const removeRangeFromX = (
   y1: bigint,
   y2: bigint
 ): { min: bigint; max: bigint }[] => {
+  console.log(`\t\t\t--RemoveRange x:[${x1},${x2}], y:[${y1},${y2}]`);
+
   if (x1 <= y2 && y1 <= x2) {
     // There is overlap
     if (x1 <= y1 && x2 <= y2) {
-      console.log("a");
+      console.log("\t\t\t\ta - Remove Right");
+      // x1=============x2
+      //    y1================y2
 
       return [{ min: x1, max: y1 }];
     }
     if (y1 <= x1 && y2 <= x2) {
-      console.log("b");
+      console.log("\t\t\t\tb - Remove Left");
+      //       x1=============x2
+      // y1================y2
       return [{ min: y2, max: x2 }];
     }
     if (x1 <= y1 && x2 >= y2) {
-      console.log("c");
+      console.log("\t\t\t\tc - Split");
+      // x1======================x2
+      //    y1================y2
       return [
         { min: x1, max: y1 },
         { min: y2, max: x2 },
       ];
     }
     if (y1 <= x1 && y2 >= x2) {
-      console.log("d");
+      console.log("\t\t\t\td - Remove All");
+      //       x1=============x2
+      //    y1====================y2
       return [];
     }
+    //???
     return [{ min: BigInt(-1), max: BigInt(-1) }];
   }
-  console.log("f");
+
+  console.log("\t\t\t\tNo Overlap");
   return [{ min: x1, max: x2 }];
 };
 
