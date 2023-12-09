@@ -16,6 +16,7 @@ export const computeNextOrder = (order: number[]) => {
   return order.reduce((acc, num, i, arr) => {
     if (i === arr.length - 1) return acc;
     const nextNum = arr[i + 1];
+    //Since we can assume the input we are given is going to eventually go to all constants we could try to short circuit this by checking the first two terms to see if they are the same?
     return [...acc, nextNum - num];
   }, [] as number[]);
 };

@@ -21,7 +21,7 @@ export const computeNextOrder = (order: number[]) => {
 };
 
 try {
-  const useExample = true;
+  const useExample = false;
   const filePath = useExample ? "input-example1.txt" : "input.txt";
   const input = fs.readFileSync(filePath, "utf8");
 
@@ -43,6 +43,7 @@ try {
     };
   });
 
+  // This would be a cool way to solve it if the actual input didn't have solved histories that went 20 deep (that's an order 20 polynomial)
   const equations = solvedHistories.map((solvedHistory) => {
     switch (solvedHistory.orders.length) {
       case 0:
@@ -59,24 +60,28 @@ try {
         }; //
       case 4:
         return (x: number) => {
-          const C = solvedHistory.orders[0][0];
-          const xs = [0, 1, 2];
-          const ys = solvedHistory.orders[0].slice(0, 3);
-          const A =
-            (ys[1] - ys[0]) / (xs[1] - xs[0]) -
-            (ys[2] - ys[1]) / (xs[2] - xs[1]);
-          const B = (ys[1] - ys[0]) / (xs[1] - xs[0]) - A * (xs[0] + xs[1]);
-
-          return A * Math.pow(x, 2) + B * x + C;
+          // https://www.youtube.com/watch?v=vMUpBT7_9Xw
+          // Something like that youtube video will allow me to calculate A,B,and C of the general quadratic
+          return null;
         };
       case 5:
+        // Ax^3 + Bx^2 + Cx + D = 0
+        return (x: number) => null;
+
+      case 6:
+        // Ax^4 + Bx^3 + Cx^2 + Dx + E = 0.
         return (x: number) => null;
     }
   });
 
   //   console.log(util.inspect(solvedHistories, false, null, true));
 
-  console.log(equations[1]?.(4));
+  console.log(
+    solvedHistories.reduce((acc, solvedHistory) => {
+      if (solvedHistory.orders.length > acc) return solvedHistory.orders.length;
+      return acc;
+    }, Number.MIN_SAFE_INTEGER)
+  );
 } catch (e: any) {
   console.log("Error:", e.stack);
 }
