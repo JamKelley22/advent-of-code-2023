@@ -89,8 +89,6 @@ try {
   });
 
   console.log(manhattanTotal);
-
-  //82000210 too low
 } catch (e: any) {
   console.log("Error:", e.stack);
 }
