@@ -17,6 +17,31 @@ type SpaceType = (typeof Space)[number];
 export const Direction = ["North", "South", "East", "West"] as const;
 type DirectionType = (typeof Direction)[number];
 
+//─│┌ ┐└ ┘
+//═║╔ ╗╚ ╝
+export const SpaceToCharacterOptions: Map<SpaceType, string>[] = [
+  new Map<SpaceType, string>([
+    ["-", "─"],
+    [".", "."],
+    ["7", "┐"],
+    ["F", "┌"],
+    ["J", "┘"],
+    ["L", "└"],
+    ["S", "S"],
+    ["|", "│"],
+  ]),
+  new Map<SpaceType, string>([
+    ["-", "═"],
+    [".", "."],
+    ["7", "╗"],
+    ["F", "╔"],
+    ["J", "╝"],
+    ["L", "╚"],
+    ["S", "S"],
+    ["|", "║"],
+  ]),
+];
+
 function isOfTypeSpace(keyInput: string): keyInput is SpaceType {
   return Space.includes(keyInput as SpaceType);
 }
@@ -24,8 +49,8 @@ function isOfTypeSpace(keyInput: string): keyInput is SpaceType {
 const getSpaceEncodedString = (
   i: number,
   j: number,
-  space: SpaceType
-): string => `[${i},${j}]-${space}`;
+  space?: SpaceType
+): string => `[${i},${j}]`;
 
 const spaceDirMap = new Set<string>([
   `${"|" satisfies SpaceType}-${"North" satisfies DirectionType}`,
@@ -148,7 +173,8 @@ export const spaceMatrixToString = (spaceMatrix: SpaceType[][]): string => {
     ret += i + " ";
     for (let j = 0; j < spaceLine.length; j++) {
       const space = spaceLine[j];
-      ret += space + " ";
+      const convertedSpace = SpaceToCharacterOptions[1].get(space);
+      ret += convertedSpace + " ";
     }
     ret += "\n";
   }
@@ -161,23 +187,71 @@ export const printDistances = (
   }>,
   spaceMatrix: SpaceType[][]
 ): string => {
-  let ret = "";
-
+  let ret = "  ";
+  [...new Array(spaceMatrix[0].length).keys()].forEach(
+    (num, i) => (ret += i + " ")
+  );
+  ret += "\n";
   for (let i = 0; i < spaceMatrix.length; i++) {
     const spaceLine = spaceMatrix[i];
+    ret += i + " ";
     for (let j = 0; j < spaceLine.length; j++) {
       const space = spaceLine[j];
       const dist = distances[getSpaceEncodedString(i, j, space)];
       if (dist !== undefined) {
-        ret += dist % 10;
+        ret += `${dist % 10} `;
         continue;
       }
-      ret += space;
+      ret += space + " ";
     }
     ret += "\n";
   }
 
   return ret;
+};
+
+export const identifyStartSpace = (
+  spaceMap: Map<string, SpaceType>,
+  startLoc: Location
+): SpaceType => {
+  //Look around start for available pipes to connect
+  const northOfStart = spaceMap.get(
+    getSpaceEncodedString(startLoc.i - 1, startLoc.j)
+  );
+  const southOfStart = spaceMap.get(
+    getSpaceEncodedString(startLoc.i + 1, startLoc.j)
+  );
+  const eastOfStart = spaceMap.get(
+    getSpaceEncodedString(startLoc.i, startLoc.j + 1)
+  );
+  const westOfStart = spaceMap.get(
+    getSpaceEncodedString(startLoc.i, startLoc.j - 1)
+  );
+
+  const northSpaceConnects = spaceDirMap.has(`${northOfStart}-South`);
+  const southSpaceConnects = spaceDirMap.has(`${southOfStart}-North`);
+  const eastSpaceConnects = spaceDirMap.has(`${eastOfStart}-West`);
+  const westSpaceConnects = spaceDirMap.has(`${westOfStart}-East`);
+
+  //All = ─│┌ ┐└ ┘
+  let startSpace: SpaceType = "S";
+  if (eastSpaceConnects && westSpaceConnects) {
+    startSpace = "-";
+  } else if (northSpaceConnects && southSpaceConnects) {
+    startSpace = "|";
+  } else if (southSpaceConnects && eastSpaceConnects) {
+    startSpace = "F";
+  } else if (southSpaceConnects && westSpaceConnects) {
+    startSpace = "7";
+  } else if (northSpaceConnects && eastSpaceConnects) {
+    startSpace = "L";
+  } else if (northSpaceConnects && westSpaceConnects) {
+    startSpace = "J";
+  } else {
+    throw new Error("Could not identify startSpace");
+  }
+
+  return startSpace;
 };
 
 try {
@@ -187,12 +261,24 @@ try {
 
   const lines: string[] = input.split("\n");
   const { spaceMatrix, startLoc } = parseGridToSpaceMatrix(lines);
-  console.log("startLoc", startLoc);
 
-  //   console.log(spaceMatrixToString(spaceMatrix));
+  if (!startLoc) throw new Error("Could not locate start location");
+
+  const spaceMap = parseGridToSpaceMap(spaceMatrix);
+
+  const startSpace = identifyStartSpace(spaceMap, startLoc);
+  spaceMap.set(getSpaceEncodedString(startLoc.i, startLoc.j), startSpace);
+  spaceMatrix[startLoc.i][startLoc.j] = startSpace;
+
+  console.log({ startSpace });
+
+  console.log(spaceMatrixToString(spaceMatrix));
+
+  // console.log("startLoc", startLoc);
+
+  // //   console.log(spaceMatrixToString(spaceMatrix));
 
   const spaceGraph = parseGridToGraph(spaceMatrix);
-  const spaceMap = parseGridToSpaceMap(spaceMatrix);
 
   const startLocString = getSpaceEncodedString(
     startLoc?.i ?? 0,
@@ -200,42 +286,44 @@ try {
     "S"
   );
 
-  console.log(spaceGraph);
+  // console.log(spaceGraph);
 
-  const connectedNodes: string[] = [];
+  // const connectedNodes: string[] = [];
 
-  spaceGraph.dfs(startLocString, (vert, dist) => {
-    // console.log(vert, dist);
-    connectedNodes.push(vert);
-  });
+  // spaceGraph.dfs(startLocString, (vert, dist) => {
+  //   // console.log(vert, dist);
+  //   connectedNodes.push(vert);
+  // });
 
-  console.log(connectedNodes);
+  // console.log(connectedNodes);
 
-  spaceGraph.AdjList.forEach((val, key) => {
-    if (!connectedNodes.includes(key)) {
-      console.log("Remove: ", key);
+  // spaceGraph.AdjList.forEach((val, key) => {
+  //   if (!connectedNodes.includes(key)) {
+  //     console.log("Remove: ", key);
 
-      spaceGraph.removeVertex(key);
+  //     spaceGraph.removeVertex(key);
+  //   }
+  // });
+
+  // console.log(spaceGraph);
+
+  const distances = spaceGraph.dijkstra(startLocString);
+  console.log(printDistances(distances, spaceMatrix));
+
+  let maxDist = Number.MIN_SAFE_INTEGER;
+  Object.keys(distances).forEach((key) => {
+    const value = distances[key]!;
+    if (value > maxDist && value !== Number.MAX_SAFE_INTEGER) {
+      maxDist = value;
     }
+    // console.log(`Key: ${key}, Value: ${value}`);
   });
 
-  console.log(spaceGraph);
+  console.log(maxDist);
 
-  //   const distances = spaceGraph.dijkstra(startLocString);
-  //   console.log(printDistances(distances, spaceMatrix));
+  // 4211 is too low
 
-  //   let maxDist = Number.MIN_SAFE_INTEGER;
-  //   Object.keys(distances).forEach((key) => {
-  //     const value = distances[key]!;
-  //     if (value > maxDist) {
-  //       maxDist = value;
-  //     }
-  //     // console.log(`Key: ${key}, Value: ${value}`);
-  //   });
-
-  //   console.log(maxDist);
-
-  //   spaceGraph.printGraph();
+  // //   spaceGraph.printGraph();
 } catch (e: any) {
   console.log("Error:", e.stack);
 }
