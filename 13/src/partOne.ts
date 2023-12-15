@@ -72,7 +72,7 @@ export const parseMirrorBlock = (blockStr: string): SurfaceType[][] => {
 };
 
 try {
-  const useExample = true;
+  const useExample = false;
   const filePath = useExample ? "input-example4.txt" : "input.txt";
   const input: string = fs.readFileSync(filePath, "utf8");
 
@@ -86,7 +86,7 @@ try {
       const lineReflectionIndicesRow = transpose(currentBlock).map((line) =>
         findLineReflectionIndex(line)
       );
-      console.log({ lineReflectionIndicesCol, lineReflectionIndicesRow });
+      console.log({ lineReflectionIndicesCol });
 
       const maxReflectionCol =
         calculateMaxReflectionFromMaxReflectionDistancesAtSplitIndices(
@@ -105,7 +105,7 @@ try {
         maxReflectionCol.maxReflectionDistance >
         maxReflectionRow.maxReflectionDistance
       ) {
-        // console.log({ maxReflectionCol });
+        console.log({ maxReflectionCol });
         console.log(
           mirrorBlockToAnnotatedString(currentBlock, {
             col: maxReflectionCol.splitIndex,
@@ -117,7 +117,7 @@ try {
           row: acc.row,
         };
       } else {
-        // console.log({ maxReflectionRow });
+        console.log({ maxReflectionRow });
         console.log(
           mirrorBlockToAnnotatedString(currentBlock, {
             row: maxReflectionRow.splitIndex,

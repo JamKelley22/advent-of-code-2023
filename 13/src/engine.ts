@@ -14,19 +14,12 @@ export const calculateMaxReflectionFromMaxReflectionDistancesAtSplitIndices = (
   }[],
   log: boolean = false
 ): { splitIndex: number; maxReflectionDistance: number } => {
-  if (log)
-    console.log(
-      { maxReflectionDistancesAtSplitIndices },
-      Object.keys(maxReflectionDistancesAtSplitIndices[0]).length
-    );
+  const dist = Object.keys(maxReflectionDistancesAtSplitIndices[0]).length;
+  if (log) console.log({ maxReflectionDistancesAtSplitIndices }, dist);
 
   const minReflectionDistancesAtSplitIndex: { [splitIndex: number]: number } =
     {};
-  for (
-    let splitIndex = 0;
-    splitIndex < Object.keys(maxReflectionDistancesAtSplitIndices[0]).length;
-    splitIndex++
-  ) {
+  for (let splitIndex = 0; splitIndex < dist; splitIndex++) {
     maxReflectionDistancesAtSplitIndices.forEach((lineReflectionIndex) => {
       if (
         lineReflectionIndex[splitIndex] <
@@ -45,7 +38,11 @@ export const calculateMaxReflectionFromMaxReflectionDistancesAtSplitIndices = (
   ).reduce(
     (acc, [key, value]) => {
       const numericKey = parseInt(key);
-      if (!isNaN(numericKey) && value > acc.maxReflectionDistance) {
+      if (
+        !isNaN(numericKey) &&
+        value > acc.maxReflectionDistance &&
+        (numericKey - value <= 0 || numericKey + value >= dist)
+      ) {
         return {
           splitIndex: numericKey,
           maxReflectionDistance: value,
