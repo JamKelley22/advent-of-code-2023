@@ -1,0 +1,65 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "5",
+			"path": "5"
+		},
+		{
+			"name": "13",
+			"path": "13"
+		},
+		{
+			"name": "2",
+			"path": "2"
+		},
+		{
+			"name": "12",
+			"path": "12"
+		},
+		{
+			"name": "3",
+			"path": "3"
+		},
+		{
+			"name": "4",
+			"path": "4"
+		},
+		{
+			"name": "8",
+			"path": "8"
+		},
+		{
+			"name": "10",
+			"path": "10"
+		},
+		{
+			"name": "1",
+			"path": "1"
+		},
+		{
+			"name": "7",
+			"path": "7"
+		},
+		{
+			"name": "6",
+			"path": "6"
+		},
+		{
+			"name": "11",
+			"path": "11"
+		},
+		{
+			"name": "9",
+			"path": "9"
+		}
+	],
+	"settings": {
+		"jest.disabledWorkspaceFolders": [
+			"advent-of-code-2023",
+			"2"
+		]
+	}
+}
