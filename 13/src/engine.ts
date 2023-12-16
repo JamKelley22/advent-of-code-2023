@@ -56,6 +56,54 @@ export const calculateMaxReflectionFromMaxReflectionDistancesAtSplitIndices = (
   return maxReflection;
 };
 
+export const calculateAllReflectionsFromMaxReflectionDistancesAtSplitIndices = (
+  maxReflectionDistancesAtSplitIndices: {
+    [splitIndex: number]: number;
+  }[],
+  log: boolean = false
+): { splitIndex: number; maxReflectionDistance: number }[] => {
+  const dist = Object.keys(maxReflectionDistancesAtSplitIndices[0]).length;
+  if (log) console.log({ maxReflectionDistancesAtSplitIndices }, dist);
+
+  const minReflectionDistancesAtSplitIndex: { [splitIndex: number]: number } =
+    {};
+  for (let splitIndex = 0; splitIndex < dist; splitIndex++) {
+    maxReflectionDistancesAtSplitIndices.forEach((lineReflectionIndex) => {
+      if (
+        lineReflectionIndex[splitIndex] <
+        (minReflectionDistancesAtSplitIndex[splitIndex] ??
+          Number.MAX_SAFE_INTEGER)
+      ) {
+        minReflectionDistancesAtSplitIndex[splitIndex] =
+          lineReflectionIndex[splitIndex];
+      }
+    });
+  }
+  if (log) console.log({ minReflectionDistancesAtSplitIndex });
+
+  const maxReflection = Object.entries(
+    minReflectionDistancesAtSplitIndex
+  ).reduce((acc, [key, value]) => {
+    const numericKey = parseInt(key);
+    if (
+      !isNaN(numericKey) &&
+      (numericKey - value <= 0 || numericKey + value >= dist) &&
+      numericKey !== 0
+    ) {
+      return [
+        ...acc,
+        {
+          splitIndex: numericKey,
+          maxReflectionDistance: value,
+        },
+      ];
+    }
+    return acc;
+  }, [] as { splitIndex: number; maxReflectionDistance: number }[]);
+
+  return maxReflection;
+};
+
 export const findLineReflectionIndex = (
   line: SurfaceType[]
 ): { [splitIndex: number]: number } => {
