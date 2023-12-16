@@ -150,3 +150,77 @@ export const rangeNonOverlap = (
     { min: y1, max: y2 },
   ];
 };
+
+export const getOverlappingRanges = (
+  mapRow: {
+    s: number;
+    d: number;
+    r: number;
+  },
+  seedRange: {
+    min: bigint;
+    max: bigint;
+  }[]
+) => {
+  const { s, d, r } = mapRow;
+  // Check overlap with each seed range
+  return seedRange.reduce(
+    (acc, seedRange) => {
+      const overlap = rangeOverlap(
+        seedRange.min,
+        seedRange.max,
+        BigInt(d),
+        BigInt(d) + BigInt(r)
+      );
+      //   let modifiedSeedRanges = [seedRange];
+
+      const croppedSeedRanges = removeRangeFromX(
+        seedRange.min,
+        seedRange.max,
+        BigInt(d),
+        BigInt(d) + BigInt(r)
+      );
+      console.log(
+        "88",
+        // seedRange.min,
+        // seedRange.max,
+        // BigInt(d),
+        // BigInt(d) + BigInt(r),
+        croppedSeedRanges
+      );
+
+      if (overlap) {
+        const differenceBetweenSourceAndDestination = d - s;
+
+        return [
+          ...acc,
+          {
+            transformedSeedRange: {
+              min: overlap.min - BigInt(differenceBetweenSourceAndDestination),
+              max: overlap.max - BigInt(differenceBetweenSourceAndDestination),
+            },
+            croppedSeedRanges: croppedSeedRanges,
+            // modifiedSeedRanges:
+            //   croppedSeedRange !== null ? croppedSeedRange : [],
+          },
+        ];
+      }
+
+      return [
+        ...acc,
+        {
+          transformedSeedRange: undefined,
+          croppedSeedRanges: croppedSeedRanges,
+        },
+      ];
+    },
+    [] as {
+      transformedSeedRange?: {
+        min: bigint;
+        max: bigint;
+      };
+      croppedSeedRanges: { min: bigint; max: bigint }[];
+      //   modifiedSeedRanges: { min: bigint; max: bigint }[];
+    }[]
+  );
+};

@@ -132,7 +132,7 @@ export const parseMapsInfo = (lines: string[]) => {
 };
 
 try {
-  const useExample = false;
+  const useExample = true;
   const filePath = useExample ? "input-example1.txt" : "input.txt";
   const input = fs.readFileSync(filePath, "utf8");
 
