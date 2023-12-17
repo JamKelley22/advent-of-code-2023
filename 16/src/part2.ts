@@ -230,6 +230,8 @@ export const runSimulation = async (
     }
   }
 
+  tileVisitedFromDirectionSet.clear();
+
   onDone(simulation.steps[simulation.steps.length - 1].energizedTiles.size);
 };
 
@@ -238,24 +240,165 @@ try {
   const filePath = useExample ? "input-example1.txt" : "input.txt";
   const input: string = fs.readFileSync(filePath, "utf8");
   const simulation = parseSimulation(input);
-  for (let i = 0; i < simulation.width; i++) {
+
+  //   const startingBeam: Beam = {
+  //     location: { i: 0, j: 4 },
+  //     velocity: { i: 1, j: 0 },
+  //   };
+  //   simulation.steps[0].beams.push(startingBeam);
+  //   runSimulation(
+  //     simulation,
+  //     true,
+  //     (num) => {
+  //       // console.log("Done Top");
+  //       console.log(startingBeam);
+
+  //       console.log(num);
+  //     },
+  //     2000
+  //   );
+
+  //Top
+  for (let j = 0; j < simulation.width; j++) {
+    const currentSim = structuredClone(simulation);
     const startingBeam: Beam = {
-      location: { i: 0, j: 0 },
-      velocity: { i: 0, j: 1 },
+      location: { i: 0, j: j },
+      velocity: { i: 1, j: 0 },
     };
-    simulation.steps[0].beams.push(startingBeam);
+    currentSim.steps[0].beams.push(startingBeam);
     runSimulation(
-      simulation,
+      currentSim,
       false,
       (num) => {
-        // console.log("Done");
-        console.log(startingBeam);
+        // console.log("Done Top");
+        // console.log(startingBeam);
+        fs.appendFileSync("ans.txt", `${num.toString()}\n`);
 
         console.log(num);
       },
       2000
     );
   }
+
+  //Bottom
+  for (let j = 0; j < simulation.width; j++) {
+    const currentSim = structuredClone(simulation);
+    const startingBeam: Beam = {
+      location: { i: currentSim.height - 1, j: j },
+      velocity: { i: -1, j: 0 },
+    };
+    currentSim.steps[0].beams.push(startingBeam);
+    runSimulation(
+      currentSim,
+      false,
+      (num) => {
+        // console.log("Done Top");
+        // console.log(startingBeam);
+        fs.appendFileSync("ans.txt", `${num.toString()}\n`);
+
+        console.log(num);
+      },
+      2000
+    );
+  }
+
+  //Left
+  for (let i = 0; i < simulation.height; i++) {
+    const currentSim = structuredClone(simulation);
+    const startingBeam: Beam = {
+      location: { i: i, j: 0 },
+      velocity: { i: 0, j: 1 },
+    };
+    currentSim.steps[0].beams.push(startingBeam);
+    runSimulation(
+      currentSim,
+      false,
+      (num) => {
+        // console.log("Done Top");
+        // console.log(startingBeam);
+        fs.appendFileSync("ans.txt", `${num.toString()}\n`);
+
+        console.log(num);
+      },
+      2000
+    );
+  }
+
+  //Right
+  for (let i = 0; i < simulation.height; i++) {
+    const currentSim = structuredClone(simulation);
+    const startingBeam: Beam = {
+      location: { i: i, j: simulation.width - 1 },
+      velocity: { i: 0, j: -1 },
+    };
+    currentSim.steps[0].beams.push(startingBeam);
+    runSimulation(
+      currentSim,
+      false,
+      (num) => {
+        // console.log("Done Top");
+        // console.log(startingBeam);
+        fs.appendFileSync("ans.txt", `${num.toString()}\n`);
+
+        console.log(num);
+      },
+      2000
+    );
+  }
+
+  const nums: string = fs.readFileSync("ans.txt", "utf8");
+
+  const maxNum = nums
+    .split("\n")
+    .map((numStr) => parseInt(numStr))
+    .reduce((acc, num) => {
+      if (num > acc) return num;
+      return acc;
+    }, Number.MIN_SAFE_INTEGER);
+
+  fs.writeFileSync("ans.txt", ``);
+
+  console.log({ maxNum });
+
+  //   //Bottom
+  //   for (let j = 0; j < simulation.width; j++) {
+  //     const startingBeam: Beam = {
+  //       location: { i: simulation.height - 1, j: j },
+  //       velocity: { i: 0, j: -1 },
+  //     };
+  //     simulation.steps[0].beams.push(startingBeam);
+  //     runSimulation(
+  //       simulation,
+  //       false,
+  //       (num) => {
+  //         // console.log("Done Bottom");
+  //         // console.log(startingBeam);
+
+  //         console.log(num);
+  //       },
+  //       2000
+  //     );
+  //   }
+
+  //   //Left
+  //   for (let i = 0; i < simulation.height; i++) {
+  //     const startingBeam: Beam = {
+  //       location: { i: i, j: 0 },
+  //       velocity: { i: 1, j: 0 },
+  //     };
+  //     simulation.steps[0].beams.push(startingBeam);
+  //     runSimulation(
+  //       simulation,
+  //       false,
+  //       (num) => {
+  //         // console.log("Done Bottom");
+  //         console.log(startingBeam);
+
+  //         console.log(num);
+  //       },
+  //       2000
+  //     );
+  //   }
 
   //   console.log(simulationStepToString(simulation, 0));
 } catch (e: any) {
