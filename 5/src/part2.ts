@@ -1,3 +1,5 @@
+import { rangeOverlap } from "./engine";
+
 var fs = require("fs");
 
 export const parseSeeds = (seedLine: string): number[] => {
@@ -59,6 +61,14 @@ export const parseMapsInfo = (lines: string[]) => {
   return mapSourceDestRanges;
 };
 
+// export const mapInfoToRange = (mapInfo: {
+//   s: bigint;
+//   d: bigint;
+//   r: bigint;
+// }): {} => {
+
+// }
+
 try {
   const useExample = true;
   const filePath = useExample ? "input-example1.txt" : "input.txt";
@@ -74,8 +84,10 @@ try {
 
   blocks.forEach((block) => {
     const mapBlock = block.split("\n");
+
     const mapInfo = parseMapsInfo(mapBlock)[0];
-    // console.log({ mapInfo });
+
+    console.log({ mapInfo });
 
     for (
       let seedRangeIndex = 0;
@@ -84,7 +96,23 @@ try {
     ) {
       const seedRange = seedRanges[seedRangeIndex];
 
-      mapInfo.forEach((mapRange) => {});
+      mapInfo.forEach((mapRange) => {
+        const overlap = rangeOverlap(
+          seedRange.min,
+          seedRange.max,
+          mapRange.d,
+          mapRange.d + mapRange.r
+        );
+        if (overlap) {
+          const destSrcDelta = mapRange.d - mapRange.s;
+          const shiftedOverlap = {
+            min: overlap.min - destSrcDelta,
+            max: overlap.max - destSrcDelta,
+          };
+          console.log({ shiftedOverlap });
+        }
+        // console.log({ overlap });
+      });
     }
   });
 } catch (e: any) {
