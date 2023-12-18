@@ -137,14 +137,14 @@ try {
   //   endTime = performance.now();
   //   console.log(`===${(endTime - startTime) / 1000} seconds===`);
 
-  //   console.log("===Digging Interior===");
-  //   startTime = performance.now();
-  //   const filledArea = stackFloodFill(trenchMap, startLoc);
-  //   endTime = performance.now();
-  //   console.log(`===${(endTime - startTime) / 1000} seconds===`);
+  console.log("===Digging Interior===");
+  startTime = performance.now();
+  const filledArea = stackFloodFill(trenchMap, startLoc);
+  endTime = performance.now();
+  console.log(`===${(endTime - startTime) / 1000} seconds===`);
 
-  //   trenchMap.interior = filledArea;
-  //   console.log(trenchMap.map.size + trenchMap.interior.size);
+  trenchMap.interior = filledArea;
+  console.log(trenchMap.map.size + trenchMap.interior.size);
 } catch (e: any) {
   console.log("Error:", e.stack);
 }

@@ -95,7 +95,20 @@ export const stackFloodFill = (
   const filled = new Set<string>();
   const stack = [startingLocation];
 
-  while (stack.length > 0) {
+  console.log("===Digging Interior===");
+  let startTime = 0,
+    endTime = 0;
+
+  startTime = performance.now();
+  for (let i = 0; stack.length > 0; i++) {
+    if (i % 1000000 === 0) {
+      endTime = performance.now();
+      console.log(
+        stack.length,
+        `===${(endTime - startTime) / 1000} seconds===`
+      );
+    }
+
     const currentLoc = stack.pop();
     if (!currentLoc) continue;
     filled.add(encodeLocation(currentLoc));
