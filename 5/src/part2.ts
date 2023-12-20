@@ -82,7 +82,7 @@ try {
   const seedRanges = parseSeedRanges(blocks.shift() ?? "");
   console.log({ seedRanges });
 
-  blocks.forEach((block) => {
+  blocks.slice(0, 1).forEach((block) => {
     const mapBlock = block.split("\n");
 
     const mapInfo = parseMapsInfo(mapBlock)[0];
@@ -94,12 +94,17 @@ try {
       seedRangeIndex < seedRanges.length;
       seedRangeIndex++
     ) {
-      const seedRange = seedRanges[seedRangeIndex];
+      const ogSeedRange = seedRanges[seedRangeIndex];
+
+      const modifiedSeedRange: {
+        min: bigint;
+        max: bigint;
+      }[] = [];
 
       mapInfo.forEach((mapRange) => {
         const overlap = rangeOverlap(
-          seedRange.min,
-          seedRange.max,
+          ogSeedRange.min,
+          ogSeedRange.max,
           mapRange.d,
           mapRange.d + mapRange.r
         );
