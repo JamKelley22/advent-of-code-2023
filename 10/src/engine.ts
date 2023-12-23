@@ -12,7 +12,7 @@ export class Graph<T extends string | number> {
   }
 
   removeVertex(v: T) {
-    if (!this.AdjList.has(v)) this.AdjList.delete(v);
+    if (this.AdjList.has(v)) this.AdjList.delete(v);
   }
 
   addEdge(v: T, w: T) {
@@ -29,6 +29,23 @@ export class Graph<T extends string | number> {
       wVertex?.push(v);
     }
   }
+  removeEdge(v: T, w: T) {
+    console.log(v, w);
+
+    const newAdjList = this.AdjList.get(v)?.filter((val) => val !== w);
+    if (newAdjList) this.AdjList.set(v, newAdjList);
+    // If graph is undirected,
+    // add an edge from w to v also
+
+    // if (!this.isDirected) {
+    //   let wVertex = this.AdjList.get(w);
+    //   if (!wVertex) {
+    //     this.addVertex(w);
+    //     wVertex = this.AdjList.get(w);
+    //   }
+    //   wVertex?.push(v);
+    // }
+  }
 
   printGraph() {
     let get_keys = this.AdjList.keys();
@@ -43,9 +60,10 @@ export class Graph<T extends string | number> {
     }
   }
 
-  bfs(startingNode: T) {
+  bfs(startingNode: T, visit?: (vert: T, dist: number) => void) {
     // create a visited object
     let visited: Partial<{ [key in T]: boolean }> = {};
+    let count = 0;
 
     // Create an object for queue
     let q: T[] = []; //new Queue();
@@ -60,10 +78,11 @@ export class Graph<T extends string | number> {
       let getQueueElement = q.shift();
 
       // passing the current vertex to callback function
-      console.log(getQueueElement);
+      // console.log(getQueueElement);
 
       // get the adjacent list for current vertex
       if (getQueueElement) {
+        visit?.(getQueueElement, ++count);
         const list = this.AdjList.get(getQueueElement);
         if (list) {
           for (let index = 0; index < list.length; index++) {
@@ -85,6 +104,12 @@ export class Graph<T extends string | number> {
     let visited: Partial<{ [key in T]: boolean }> = {};
 
     this.DFSUtil(startingNode, visited, 0, visit);
+
+    // const processStack = [startingNode]
+
+    // while(processStack.length > 0) {
+
+    // }
   }
 
   DFSUtil(

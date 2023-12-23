@@ -50,8 +50,8 @@ export const gardenToString = (
   console.log(garden.width, garden.height);
 
   let ret = "";
-  for (let y = 0; y < garden.height * 2; y++) {
-    for (let x = 0; x < garden.width * 2; x++) {
+  for (let y = -garden.height * 2; y < garden.height * 2; y++) {
+    for (let x = -garden.width * 2; x < garden.width * 2; x++) {
       const loc: Location = { x, y };
       let tile = getGardenTile(garden, loc);
       if (visited?.has(encodeLocation(loc))) {
@@ -66,11 +66,11 @@ export const gardenToString = (
 };
 
 try {
-  const useExample = false;
+  const useExample = true;
   const filePath = useExample ? "input-example1.txt" : "input.txt";
   const input: string = fs.readFileSync(filePath, "utf8");
   const garden = parseGarden(input);
-  const maxStepNum = 26501365;
+  const maxStepNum = 50;
 
   //   console.log(
   //     gardenToString({
@@ -88,7 +88,7 @@ try {
   let nextProcessStack = new Map<string, Tile>();
 
   for (let step = 0; step <= maxStepNum; step++) {
-    console.log({ step });
+    // console.log({ step });
     currentLocations.clear();
 
     while (processStack.size > 0) {
@@ -116,6 +116,8 @@ try {
     processStack = new Map(nextProcessStack);
     nextProcessStack.clear();
   }
+
+  console.log(gardenToString(garden));
 
   console.log(currentLocations.size);
 } catch (e: any) {

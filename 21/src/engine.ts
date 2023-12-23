@@ -30,14 +30,75 @@ export const decodeLocation = (locStr: string): Location => {
 
 export const getGardenTile = (
   garden: Garden,
-  location: Location
+  location: Location,
+  looping?: boolean
 ): Tile | undefined => {
   let tile = garden.map.get(
     encodeLocation({
-      x: location.x % garden.width,
-      y: location.y % garden.height,
+      x: garden.width + (location.x % garden.width),
+      y: garden.height + (location.y % garden.height),
     })
   );
+  //   if (locationEquals(location, { x: 0, y: 0 })) {
+  //     console.log({ location, tile });
+  //     console.log(
+  //       garden.width + (location.x % garden.width),
+  //       garden.height + (location.y % garden.height),
+  //       encodeLocation({
+  //         x: garden.width + (location.x % garden.width),
+  //         y: garden.height + (location.y % garden.height),
+  //       })
+  //     );
+  //   }
+
+  //   if (location.x < 0 || location.y < 0) {
+  //     tile = garden.map.get(
+  //       encodeLocation({
+  //         x: garden.width + (location.x % garden.width),
+  //         y: garden.height + (location.y % garden.height),
+  //       })
+  //     );
+  //   }
+  if (location.x >= 0 && location.y < 0) {
+    tile = "#";
+  }
+  if (location.y >= 0 && location.x < 0) {
+    tile = "#";
+  }
+  //if (location.x < 0 || location.y < 0) {
+  // let loc: Location = { x: location.x, y: location.y };
+  // if (location.x < 0 && location.y < 0) {
+  //   tile = garden.map.get(
+  //     encodeLocation({
+  //       x: garden.width + location.x,
+  //       y: garden.height + location.y,
+  //     })
+  //   );
+  // }
+  // else if (location.x < 0) {
+  //   tile = garden.map.get(
+  //     encodeLocation({
+  //       x: garden.width + location.x,
+  //       y: location.y,
+  //     })
+  //   );
+  // } else if (location.y < 0) {
+  //   tile = garden.map.get(
+  //     encodeLocation({
+  //       x: location.x,
+  //       y: garden.height + location.y,
+  //     })
+  //   );
+  // }
+
+  // console.log(
+  //   { location },
+  //   encodeLocation({
+  //     x: location.x % garden.width,
+  //     y: location.y % garden.height,
+  //   })
+  // );
+  //}
   //   if (!tile)
   //     throw new Error(
   //       `Freaky, tile not found: ${encodeLocation({
@@ -48,6 +109,15 @@ export const getGardenTile = (
   if (tile === "S" && !locationEquals(location, garden.startingLocation)) {
     tile = ".";
   }
+  //   if (!tile && location.x < 0 && location.y < 0) {
+  //     console.log(
+  //       { location },
+  //       encodeLocation({
+  //         x: garden.width + (location.x % garden.width),
+  //         y: garden.height + (location.y % garden.height),
+  //       })
+  //     );
+  //   }
   return tile;
 };
 

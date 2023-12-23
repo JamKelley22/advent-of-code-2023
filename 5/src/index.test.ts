@@ -12,6 +12,19 @@ describe("part1", () => {
     const expectedOverlap = { min: BigInt(5), max: BigInt(8) };
     expect(overlap).toEqual(expectedOverlap);
   });
+  test("Range Remove 1", () => {
+    const overlap = removeRangeFromX(
+      BigInt(1),
+      BigInt(10),
+      BigInt(5),
+      BigInt(8)
+    );
+    const expected = [
+      { min: BigInt(1), max: BigInt(5) },
+      { min: BigInt(8), max: BigInt(10) },
+    ];
+    expect(overlap).toEqual(expected);
+  });
 });
 
 describe("part2", () => {

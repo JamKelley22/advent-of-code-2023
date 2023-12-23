@@ -254,8 +254,80 @@ export const identifyStartSpace = (
   return startSpace;
 };
 
+export const removeNonMainLoopNodes = (
+  spaceGraph: Graph<string>,
+  spaceMap: Map<string, SpaceType>,
+  startLoc: Location
+) => {
+  // const adjacentNodes = spaceGraph.AdjList.get(
+  //   getSpaceEncodedString(startLoc.i, startLoc.j)
+  // );
+  spaceGraph.AdjList.forEach((adjNodes, node) => {
+    if (adjNodes.length < 2) {
+      spaceGraph.removeVertex(node);
+    }
+    if (adjNodes.length > 2) {
+      // console.log("node", node);
+
+      const [x, y] = node
+        .slice(1, node.length - 1)
+        .split(",")
+        .map((numStr) => parseInt(numStr));
+      const nodeLoc: Location = { i: x, j: y };
+      const north = getSpaceEncodedString(nodeLoc.i - 1, nodeLoc.j); //getSpaceEncodedString(startLoc.i - 1, startLoc.j);
+
+      const south = getSpaceEncodedString(nodeLoc.i + 1, nodeLoc.j);
+
+      const east = getSpaceEncodedString(nodeLoc.i, nodeLoc.j + 1);
+
+      const west = getSpaceEncodedString(nodeLoc.i, nodeLoc.j - 1);
+
+      // console.log(north, east, south, west);
+
+      const validConnections: string[] = [];
+
+      switch (spaceMap.get(node)) {
+        case "-":
+          validConnections.push(east, west);
+          break;
+        case "|":
+          validConnections.push(north, south);
+          break;
+        case "7":
+          validConnections.push(west, south);
+          break;
+        case "F":
+          validConnections.push(east, south);
+          break;
+        case "J":
+          validConnections.push(north, west);
+          break;
+        case "L":
+          validConnections.push(north, east);
+          break;
+      }
+
+      for (
+        let adjNodeIndex = 0;
+        adjNodeIndex < adjNodes.length;
+        adjNodeIndex++
+      ) {
+        const adjNode = adjNodes[adjNodeIndex];
+        if (!validConnections.includes(adjNode)) {
+          spaceGraph.removeEdge(node, adjNode);
+        }
+      }
+
+      // console.log(
+      //   node,
+      //   SpaceToCharacterOptions[1].get(spaceMap.get(node) ?? ".")
+      // );
+    }
+  });
+};
+
 try {
-  const useExample = true;
+  const useExample = false;
   const filePath = useExample ? "input-example3.txt" : "input.txt";
   const input = fs.readFileSync(filePath, "utf8");
 
@@ -272,30 +344,30 @@ try {
 
   console.log({ startSpace });
 
-  console.log(spaceMatrixToString(spaceMatrix));
+  // console.log(spaceMatrixToString(spaceMatrix));
 
   // console.log("startLoc", startLoc);
 
-  // //   console.log(spaceMatrixToString(spaceMatrix));
+  console.log(spaceMatrixToString(spaceMatrix));
 
   const spaceGraph = parseGridToGraph(spaceMatrix);
+  removeNonMainLoopNodes(spaceGraph, spaceMap, startLoc);
 
   const startLocString = getSpaceEncodedString(
     startLoc?.i ?? 0,
-    startLoc?.j ?? 0,
-    "S"
+    startLoc?.j ?? 0
   );
 
   // console.log(spaceGraph);
 
-  // const connectedNodes: string[] = [];
+  const connectedNodes: string[] = [];
 
-  // spaceGraph.dfs(startLocString, (vert, dist) => {
-  //   // console.log(vert, dist);
-  //   connectedNodes.push(vert);
-  // });
+  spaceGraph.bfs(startLocString, (vert, dist) => {
+    // console.log(vert, dist);
+    connectedNodes.push(vert);
+  });
 
-  // console.log(connectedNodes);
+  console.log(connectedNodes.length / 2);
 
   // spaceGraph.AdjList.forEach((val, key) => {
   //   if (!connectedNodes.includes(key)) {
@@ -307,19 +379,19 @@ try {
 
   // console.log(spaceGraph);
 
-  const distances = spaceGraph.dijkstra(startLocString);
-  console.log(printDistances(distances, spaceMatrix));
+  // const distances = spaceGraph.dijkstra(startLocString);
+  // console.log(printDistances(distances, spaceMatrix));
 
-  let maxDist = Number.MIN_SAFE_INTEGER;
-  Object.keys(distances).forEach((key) => {
-    const value = distances[key]!;
-    if (value > maxDist && value !== Number.MAX_SAFE_INTEGER) {
-      maxDist = value;
-    }
-    // console.log(`Key: ${key}, Value: ${value}`);
-  });
+  // let maxDist = Number.MIN_SAFE_INTEGER;
+  // Object.keys(distances).forEach((key) => {
+  //   const value = distances[key]!;
+  //   if (value > maxDist && value !== Number.MAX_SAFE_INTEGER) {
+  //     maxDist = value;
+  //   }
+  //   // console.log(`Key: ${key}, Value: ${value}`);
+  // });
 
-  console.log(maxDist);
+  // console.log(maxDist);
 
   // 4211 is too low
 
