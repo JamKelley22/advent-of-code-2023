@@ -14,7 +14,12 @@ export abstract class Module {
   abstract receivePulse(
     pulse: Pulse,
     fromModule?: Module
-  ): { destinationModules: Module[]; pulseToSend?: Pulse; from?: Module };
+  ): {
+    destinationModules: Module[];
+    pulseToSend?: Pulse;
+    from?: Module;
+    end?: boolean;
+  };
 
   // abstract sendPulse(): { destinationModules: Module[]; sentPulse?: Pulse };
 }
@@ -195,17 +200,25 @@ export class ButtonModule extends Module {
 }
 
 export class OutputModule extends Module {
+  endOnLow: boolean;
   constructor(name: string) {
     super(name);
+    this.endOnLow = false;
   }
   receivePulse(
     pulse: Pulse,
     fromModule?: Module
-  ): { destinationModules: Module[]; pulseToSend?: Pulse; from?: Module } {
+  ): {
+    destinationModules: Module[];
+    pulseToSend?: Pulse;
+    from?: Module;
+    end: boolean;
+  } {
     return {
       destinationModules: [],
       pulseToSend: undefined,
       from: undefined,
+      end: this.endOnLow && !pulse ? true : false,
     };
   }
 }
